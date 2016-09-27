@@ -8,12 +8,14 @@ import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoClientOptions.Builder;
 import com.mongodb.MongoException;
 import com.mongodb.ServerAddress;
+import java.util.Map;
 import javax.swing.JOptionPane;
 
 public class ConexaoMongoDB {
 
-    MongoClient mongoClient;
-    DB db;
+    private MongoClient mongoClient;
+    private DB db;
+    private DBCollection coll;
 
     public boolean conectar(String local, int porta) {
         Builder o = MongoClientOptions.builder().connectTimeout(3000);
@@ -29,15 +31,30 @@ public class ConexaoMongoDB {
         }
     }
 
-    public void criarBanco(String nome) {
+    public String criarBanco(String nome) {
         db = mongoClient.getDB(nome);
-        System.out.println("Connect to database successfully");
-
+        return db.getName();
     }
 
-    public void criarColecao(String nome) {
-        DBCollection coll = db.createCollection(nome, new BasicDBObject());
-        System.out.println("Coleção" + coll + "criada  com sucesso");
-
+    public String criarColecao(String nome) {
+        this.coll = db.createCollection(nome, new BasicDBObject());
+        return coll.getName();
     }
+
+    public MongoClient getMongoClient() {
+        return mongoClient;
+    }
+     
+    public void setMongoClient(MongoClient mongoClient) {
+        this.mongoClient = mongoClient;
+    }
+
+    public DB getDb() {
+        return db;
+    }
+    
+    public DBCollection getColl(String colecao) {
+        coll = db.getCollection(colecao);
+        return coll;
+    }   
 }
