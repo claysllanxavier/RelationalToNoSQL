@@ -1,4 +1,4 @@
-package br.com.tcc.conexao;
+package br.com.tcc.conexao.nosql.documentos;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
@@ -6,9 +6,7 @@ import com.mongodb.DBCollection;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoClientOptions.Builder;
-import com.mongodb.MongoException;
 import com.mongodb.ServerAddress;
-import java.util.Map;
 import javax.swing.JOptionPane;
 
 public class ConexaoMongoDB {
@@ -30,31 +28,4 @@ public class ConexaoMongoDB {
             return false;
         }
     }
-
-    public String criarBanco(String nome) {
-        db = mongoClient.getDB(nome);
-        return db.getName();
-    }
-
-    public String criarColecao(String nome) {
-        this.coll = db.createCollection(nome, new BasicDBObject());
-        return coll.getName();
-    }
-
-    public MongoClient getMongoClient() {
-        return mongoClient;
-    }
-     
-    public void setMongoClient(MongoClient mongoClient) {
-        this.mongoClient = mongoClient;
-    }
-
-    public DB getDb() {
-        return db;
-    }
-    
-    public DBCollection getColl(String colecao) {
-        coll = db.getCollection(colecao);
-        return coll;
-    }   
 }

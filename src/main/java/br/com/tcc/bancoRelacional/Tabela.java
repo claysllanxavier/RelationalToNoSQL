@@ -23,4 +23,18 @@ public class Tabela {
         this.colunas.add(coluna);
     }
     
+    public boolean possuiReferencia(){
+        for(Coluna c: colunas){
+            if(c.eChaveEstrangeira()){
+                return true;
+            }
+        }
+        return false;
+    }
+    public String tabelaReferenciada(){
+        for(Coluna c: colunas){
+            return c.getTabelaForeignKeyReferencia();
+        }
+        return "";
+    }
 }

@@ -1,4 +1,4 @@
-package br.com.tcc.conexao;
+package br.com.tcc.conexao.relacional;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -13,7 +13,7 @@ import javax.swing.JOptionPane;
  * @author Claysllan Xavier
  * @version 1.0
  */
-public final class ConexaoRelacional {
+public final class Conexao {
 
     String local;
     String usuario;
@@ -23,9 +23,9 @@ public final class ConexaoRelacional {
     String str_conexao;
     String driverjdbc;
 
-    public ConexaoRelacional(){}
+    public Conexao(){}
     
-    public ConexaoRelacional(String tipoBanco, String local, String porta,
+    public Conexao(String tipoBanco, String local, String porta,
             String nomeBanco, String usuario, String senha) {
         if (tipoBanco.equals("PostgreSql")) {
             setLocal(local);

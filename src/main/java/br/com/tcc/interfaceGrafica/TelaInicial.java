@@ -6,12 +6,12 @@
 package br.com.tcc.interfaceGrafica;
 
 import br.com.tcc.bancoRelacional.Banco;
-import br.com.tcc.conexao.ConexaoRelacional;
+import br.com.tcc.conexao.relacional.Conexao;
 import br.com.tcc.auxiliares.Mapeamento;
 import br.com.tcc.auxiliares.ModeloTabela;
 import br.com.tcc.bancoRelacional.Coluna;
 import br.com.tcc.bancoRelacional.Tabela;
-import br.com.tcc.conexao.ConexaoMongoDB;
+import br.com.tcc.conexao.nosql.documentos.ConexaoMongoDB;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -492,7 +492,7 @@ public class TelaInicial extends javax.swing.JFrame {
             String nomeBanco = jTextFieldBanco.getText();
             String usuario = jTextFieldUsuario.getText();
             String senha = new String(jPasswordFieldSenha.getPassword());
-            ConexaoRelacional c = new ConexaoRelacional(tipoBanco, local, porta, nomeBanco, usuario, senha);
+            Conexao c = new Conexao(tipoBanco, local, porta, nomeBanco, usuario, senha);
             if (c.conectar()) {
                 jTabbedPane1.setSelectedIndex(1);
                 try {

@@ -1,7 +1,7 @@
 package br.com.tcc.auxiliares;
 
 import br.com.tcc.bancoRelacional.*;
-import br.com.tcc.conexao.ConexaoRelacional;
+import br.com.tcc.conexao.relacional.Conexao;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -19,7 +19,7 @@ public class Mapeamento {
 
     static DatabaseMetaData metadata = null;
 
-    public Mapeamento(ConexaoRelacional c) throws SQLException {
+    public Mapeamento(Conexao c) throws SQLException {
         Connection connection = c.getC();
         metadata = connection.getMetaData();
     }
