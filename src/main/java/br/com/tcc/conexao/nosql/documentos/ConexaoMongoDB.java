@@ -1,6 +1,5 @@
 package br.com.tcc.conexao.nosql.documentos;
 
-import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.MongoClient;
@@ -17,15 +16,19 @@ public class ConexaoMongoDB {
 
     public boolean conectar(String local, int porta) {
         Builder o = MongoClientOptions.builder().connectTimeout(3000);
-        MongoClient mongo = new MongoClient(new ServerAddress(local, porta), o.build());
+        mongoClient = new MongoClient(new ServerAddress(local, porta), o.build());
         try {
-            mongo.getAddress();
+            mongoClient.getAddress();
             return true;
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Dados Incorretos!"
                     + "\nFavor informar os dados corretos para conexão.", "ERRO", JOptionPane.ERROR_MESSAGE);
-            mongo.close();
+            mongoClient.close();
             return false;
         }
+    }
+
+    public MongoClient getMongoClient() {
+        return mongoClient;
     }
 }

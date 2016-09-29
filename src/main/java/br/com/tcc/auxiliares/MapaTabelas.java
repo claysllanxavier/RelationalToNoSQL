@@ -12,40 +12,45 @@ public class MapaTabelas {
     public Map<String, Object> converterToMap(Tabela tabela, ResultSet tupla) throws SQLException {
         Map<String, Object> mapTabela = new HashMap<>();
         for (Coluna coluna : tabela.getColunas()) {
-            switch (coluna.getTipoColuna().toUpperCase()) {
-                case "TINYINT":
-                case "TINYINT UNSIGNED":
-                case "SMALLINT":
-                case "SMALLINT UNSIGNED":
-                case "MEDIUMINT":
-                case "MEDIUMINT UNSIGNED":
-                case "INT":
-                case "INT UNSIGNED":
-                case "BIGINT":
-                case "BIGINT UNSIGNED":
-                    mapTabela.put(coluna.getNome(), tupla.getLong(coluna.getNome()));
-                    break;
-                case "DECIMAL":
-                case "FLOAT":
-                case "DOUBLE":
-                case "REAL":
-                    mapTabela.put(coluna.getNome(), tupla.getFloat(coluna.getNome()));
-                    break;
-                case "BIT":
-                case "SERIAL":
-                    mapTabela.put(coluna.getNome(), tupla.getInt(coluna.getNome()));
-                    break;
-                case "BOOLEAN":
-                    mapTabela.put(coluna.getNome(), tupla.getBoolean(coluna.getNome()));
-                    break;
-                case "DATE":
-                    mapTabela.put(coluna.getNome(), tupla.getString(coluna.getNome()));
-                    break;
-                default:
-                    mapTabela.put(coluna.getNome(), tupla.getString(coluna.getNome()));
-                    break;
+            if (coluna.isChavePrimaria()) {
+                mapTabela.put("_id", tupla.getInt(coluna.getNome()));
+            } else {
+                switch (coluna.getTipoColuna().toUpperCase()) {
+                    case "TINYINT":
+                    case "TINYINT UNSIGNED":
+                    case "SMALLINT":
+                    case "SMALLINT UNSIGNED":
+                    case "MEDIUMINT":
+                    case "MEDIUMINT UNSIGNED":
+                    case "BIGINT":
+                    case "BIGINT UNSIGNED":
+                        mapTabela.put(coluna.getNome(), tupla.getLong(coluna.getNome()));
+                        break;
+                    case "DECIMAL":
+                    case "FLOAT":
+                    case "DOUBLE":
+                    case "REAL":
+                        mapTabela.put(coluna.getNome(), tupla.getFloat(coluna.getNome()));
+                        break;
+                    case "BIT":
+                    case "SERIAL":
+                    case "INT":
+                    case "INT UNSIGNED":
+                        mapTabela.put(coluna.getNome(), tupla.getInt(coluna.getNome()));
+                        break;
+                    case "BOOLEAN":
+                        mapTabela.put(coluna.getNome(), tupla.getBoolean(coluna.getNome()));
+                        break;
+                    case "DATE":
+                        mapTabela.put(coluna.getNome(), tupla.getString(coluna.getNome()));
+                        break;
+                    default:
+                        mapTabela.put(coluna.getNome(), tupla.getString(coluna.getNome()));
+                        break;
+                }
             }
         }
+
         return mapTabela;
     }
 }

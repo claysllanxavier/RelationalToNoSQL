@@ -12,6 +12,7 @@ import br.com.tcc.auxiliares.ModeloTabela;
 import br.com.tcc.bancoRelacional.Coluna;
 import br.com.tcc.bancoRelacional.Tabela;
 import br.com.tcc.conexao.nosql.documentos.ConexaoMongoDB;
+import br.com.tcc.migracao.documentos.MongodbDAO;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -492,11 +493,11 @@ public class TelaInicial extends javax.swing.JFrame {
             String nomeBanco = jTextFieldBanco.getText();
             String usuario = jTextFieldUsuario.getText();
             String senha = new String(jPasswordFieldSenha.getPassword());
-            Conexao c = new Conexao(tipoBanco, local, porta, nomeBanco, usuario, senha);
-            if (c.conectar()) {
+            conexaoRelacional = new Conexao(tipoBanco, local, porta, nomeBanco, usuario, senha);
+            if (conexaoRelacional.conectar()) {
                 jTabbedPane1.setSelectedIndex(1);
                 try {
-                    Mapeamento m = new Mapeamento(c);
+                    Mapeamento m = new Mapeamento(conexaoRelacional);
                     jLabelInformacoes.setText(m.imprmirInformacoesMetadata());
                     bd = m.mapearBanco();
                     mostrarTabelas(bd);
@@ -550,6 +551,14 @@ public class TelaInicial extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(null, "Banco de dados Destino Conectado!", "Informação", JOptionPane.INFORMATION_MESSAGE);
             JOptionPane.showMessageDialog(null, "O processo de migração será iniciado!", "Informação", JOptionPane.INFORMATION_MESSAGE);
             jTabbedPane1.setSelectedIndex(3);
+            if (bancoDestino.equals("MongoDB")) {
+                MongodbDAO mongo = new MongodbDAO(mongoConexao.getMongoClient());
+                try {
+                    mongo.migrarDados(conexaoRelacional, bd, jTextFieldBanco.getText());
+                } catch (SQLException ex) {
+                    Logger.getLogger(TelaInicial.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
     }//GEN-LAST:event_jButtonProsseguirTela3ActionPerformed
 
@@ -581,8 +590,9 @@ public class TelaInicial extends javax.swing.JFrame {
     public boolean verificarBancoDestino() {
         try {
             if (jComboBoxBancoDestino.getSelectedItem().equals("MongoDB")) {
-                ConexaoMongoDB c = new ConexaoMongoDB();
-                return c.conectar(jTextFieldIPBancoDestino.getText(), Integer.parseInt(jTextFieldPortaBancoDestino.getText()));
+                bancoDestino = "MongoDB";
+                mongoConexao = new ConexaoMongoDB();
+                return mongoConexao.conectar(jTextFieldIPBancoDestino.getText(), Integer.parseInt(jTextFieldPortaBancoDestino.getText()));
             } else {
                 JOptionPane.showMessageDialog(null, "Selecione um banco de dados!", "ERRO", JOptionPane.ERROR_MESSAGE);
             }
@@ -628,6 +638,9 @@ public class TelaInicial extends javax.swing.JFrame {
     }
     ModeloTabela modelo = new ModeloTabela();
     Banco bd;
+    ConexaoMongoDB mongoConexao;
+    Conexao conexaoRelacional;
+    String bancoDestino;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox<String> JComboboxBanco;
