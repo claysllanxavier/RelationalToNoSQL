@@ -9,6 +9,7 @@ import br.com.tcc.bancoRelacional.Banco;
 import br.com.tcc.conexao.relacional.Conexao;
 import br.com.tcc.auxiliares.Mapeamento;
 import br.com.tcc.auxiliares.ModeloTabela;
+import br.com.tcc.auxiliares.No;
 import br.com.tcc.bancoRelacional.Coluna;
 import br.com.tcc.bancoRelacional.Tabela;
 import br.com.tcc.conexao.nosql.documentos.ConexaoMongoDB;
@@ -554,7 +555,8 @@ public class TelaInicial extends javax.swing.JFrame {
             if (bancoDestino.equals("MongoDB")) {
                 MongodbDAO mongo = new MongodbDAO(mongoConexao.getMongoClient());
                 try {
-                    mongo.migrarDados(conexaoRelacional, bd, jTextFieldBanco.getText());
+                    No arvore = criaArvore(bd);
+                    mongo.migrarDados(conexaoRelacional, bd, jTextFieldBanco.getText(), arvore);
                 } catch (SQLException ex) {
                     Logger.getLogger(TelaInicial.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -600,6 +602,50 @@ public class TelaInicial extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(null, "A porta informada está incorreta!", "ERRO", JOptionPane.ERROR_MESSAGE);
         }
         return false;
+    }
+
+    public No criaArvore(Banco bd) {
+        No raiz = new No(null);
+        raiz.setNomeTabela("root");
+        boolean achou = false;
+        for (Tabela t : bd.getTabelas()) {
+            for (Coluna c : t.getColunas()) {
+                if (c.eChaveEstrangeira()) {
+                    No jaAdicionou = raiz.buscaPai(t.getNome(), raiz);
+                    if (jaAdicionou != null) {
+                        No aux = raiz.buscaPai(c.getTabelaForeignKeyReferencia(), raiz);
+                        if (aux == null) {
+                            raiz.addFilho(jaAdicionou, c.getTabelaForeignKeyReferencia());
+                            achou = true;
+                        } else {
+                            jaAdicionou.getFilho().add(aux);
+                            aux.getPai().getFilho().remove(aux);
+                            achou = true;
+                        }
+                    } else {
+                        No aux = raiz.buscaPai(c.getTabelaForeignKeyReferencia(), raiz);
+                        if (aux == null) {
+                            No filho = raiz.addFilho(raiz, t.getNome());
+                            raiz.addFilho(filho, c.getTabelaForeignKeyReferencia());
+                            achou = true;
+                        } else {
+                            No pai = aux.getPai().addFilho(aux.getPai(), t.getNome());
+                            pai.getFilho().add(aux);
+                            aux.getPai().getFilho().remove(aux);
+                            achou = true;
+                        }
+                    }
+                }
+            }
+            if (!achou) {
+                No aux = raiz.buscaPai(t.getNome(), raiz);
+                if (aux == null) {
+                    raiz.addFilho(raiz, t.getNome());
+                }
+            }
+            achou = false;
+        }
+        return raiz;
     }
 
     /**

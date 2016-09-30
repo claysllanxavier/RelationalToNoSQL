@@ -6,6 +6,7 @@
 package br.com.tcc.migracao.documentos;
 
 import br.com.tcc.auxiliares.MapaTabelas;
+import br.com.tcc.auxiliares.No;
 import br.com.tcc.bancoRelacional.Banco;
 import br.com.tcc.bancoRelacional.Tabela;
 import br.com.tcc.conexao.relacional.Conexao;
@@ -54,28 +55,33 @@ public class MongodbDAO {
         getColl(tabela.getNome()).insert(new BasicDBObject(mapTabela));
     }
 
-    public void migrarDados(Conexao c, Banco banco, String nomeBanco) throws SQLException {
+    public void migrarDados(Conexao c, Banco banco, String nomeBanco, No arvore) throws SQLException {
         criarBanco(nomeBanco);
-        for (Tabela tabela : banco.getTabelas()) {
-            criarColecao(tabela.getNome());
-            int valor_salvo = 1;
-            int subPartes = 10;
-            long inicio = 0;
+        for (No aux : arvore.getFilho()) {
+            for (Tabela tabela : banco.getTabelas()) {
+                if (aux.getNomeTabela().equalsIgnoreCase(tabela.getNome())) {
+                    criarColecao(tabela.getNome());
+                    int valor_salvo = 1;
+                    int subPartes = 10;
+                    long inicio = 0;
 
-            long total = 20198310;
-            long sub_total = total / subPartes;
+                    long total = 20198310;
+                    long sub_total = total / subPartes;
 
-            for (int i = 0; i < subPartes; i++) {
-                String sql = "SELECT * FROM " + tabela.getNome() + " LIMIT " + inicio + "," + sub_total;
-                try (PreparedStatement stmt = c.getC().prepareStatement(sql)) {
-                    ResultSet resultado = stmt.executeQuery();
-                    while (resultado.next()) {
-                        save(tabela, resultado);
-                        valor_salvo++;
+                    for (int i = 0; i < subPartes; i++) {
+                        String sql = "SELECT * FROM " + tabela.getNome() + " LIMIT " + inicio + "," + sub_total;
+                        try (PreparedStatement stmt = c.getC().prepareStatement(sql)) {
+                            ResultSet resultado = stmt.executeQuery();
+                            while (resultado.next()) {
+                                save(tabela, resultado);
+                                valor_salvo++;
+                            }
+                        }
+                        inicio = inicio + sub_total;
                     }
                 }
-                inicio = inicio + sub_total;
             }
         }
     }
+
 }
