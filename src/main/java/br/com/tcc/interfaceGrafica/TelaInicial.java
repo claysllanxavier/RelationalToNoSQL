@@ -373,6 +373,10 @@ public class TelaInicial extends javax.swing.JFrame {
 
         jTabbedPane1.addTab("Destino", jPanelAba3);
 
+        jProgressBarMigracao.setToolTipText("");
+        jProgressBarMigracao.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        jProgressBarMigracao.setStringPainted(true);
+
         jLabel9.setText("Processo:");
 
         jTextAreaInformacoes.setEditable(false);
@@ -381,6 +385,12 @@ public class TelaInicial extends javax.swing.JFrame {
         jScrollPane2.setViewportView(jTextAreaInformacoes);
 
         jToggleButtonConcluir.setText("Concluir");
+        jToggleButtonConcluir.setEnabled(false);
+        jToggleButtonConcluir.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jToggleButtonConcluirActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanelAba4Layout = new javax.swing.GroupLayout(jPanelAba4);
         jPanelAba4.setLayout(jPanelAba4Layout);
@@ -410,7 +420,7 @@ public class TelaInicial extends javax.swing.JFrame {
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 148, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(jToggleButtonConcluir)
-                .addContainerGap(16, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("Migração", jPanelAba4);
@@ -552,19 +562,32 @@ public class TelaInicial extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(null, "Banco de dados Destino Conectado!", "Informação", JOptionPane.INFORMATION_MESSAGE);
             JOptionPane.showMessageDialog(null, "O processo de migração será iniciado!", "Informação", JOptionPane.INFORMATION_MESSAGE);
             jTabbedPane1.setSelectedIndex(3);
+            jTextAreaInformacoes.setText("Migrando banco de dados...");
             if (bancoDestino.equals("MongoDB")) {
                 MongodbDAO mongo = new MongodbDAO(mongoConexao.getMongoClient());
                 No arvore = criaArvore(bd);
                 try {
+                    atualizaAreaInformacoes("Criando Banco de dados: " + jTextFieldBanco.getText());
+                    atualizaAreaInformacoes("\nMigrando tabelas e dados...");
                     mongo.migrarDados(conexaoRelacional, bd, jTextFieldBanco.getText(), arvore);
+                    atualizaAreaInformacoes("\nTabelas e dados migrados...");
+                    atualizaAreaInformacoes("\nTratando os relacionamentos das tabelas...");
                     mongo.trataRelacionamentos(bd, arvore, jTextFieldBanco.getText());
+                    atualizaAreaInformacoes("\nRelaciomanetos concluidos...");
+                    atualizaAreaInformacoes("\nRemovendo itens desnecessários...");
                     mongo.removeTabelas(bd, arvore, jTextFieldBanco.getText());
+                    atualizaAreaInformacoes("\nBanco de dados migrado com sucesso...");
+                    jToggleButtonConcluir.setEnabled(true);
                 } catch (SQLException ex) {
                     Logger.getLogger(TelaInicial.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         }
     }//GEN-LAST:event_jButtonProsseguirTela3ActionPerformed
+
+    private void jToggleButtonConcluirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButtonConcluirActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jToggleButtonConcluirActionPerformed
 
     public void mostrarTabelas(Banco bd) {
         modelo.addRow(bd);
@@ -649,6 +672,10 @@ public class TelaInicial extends javax.swing.JFrame {
         }
         return raiz;
     }
+    
+    public void atualizaAreaInformacoes(String str){
+        jTextAreaInformacoes.append(str);
+    }
 
     /**
      * @param args the command line arguments
@@ -689,7 +716,7 @@ public class TelaInicial extends javax.swing.JFrame {
     ConexaoMongoDB mongoConexao;
     Conexao conexaoRelacional;
     String bancoDestino;
-
+   
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox<String> JComboboxBanco;
     private javax.swing.JMenuItem btSair;
