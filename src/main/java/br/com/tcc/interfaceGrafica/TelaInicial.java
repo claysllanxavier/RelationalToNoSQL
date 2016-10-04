@@ -554,9 +554,11 @@ public class TelaInicial extends javax.swing.JFrame {
             jTabbedPane1.setSelectedIndex(3);
             if (bancoDestino.equals("MongoDB")) {
                 MongodbDAO mongo = new MongodbDAO(mongoConexao.getMongoClient());
+                No arvore = criaArvore(bd);
                 try {
-                    No arvore = criaArvore(bd);
                     mongo.migrarDados(conexaoRelacional, bd, jTextFieldBanco.getText(), arvore);
+                    mongo.trataRelacionamentos(bd, arvore, jTextFieldBanco.getText());
+                    mongo.removeTabelas(bd, arvore, jTextFieldBanco.getText());
                 } catch (SQLException ex) {
                     Logger.getLogger(TelaInicial.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -610,7 +612,7 @@ public class TelaInicial extends javax.swing.JFrame {
         boolean achou = false;
         for (Tabela t : bd.getTabelas()) {
             for (Coluna c : t.getColunas()) {
-                if (c.eChaveEstrangeira()) {
+                if (c.isChaveEstrangeira()) {
                     No jaAdicionou = raiz.buscaPai(t.getNome(), raiz);
                     if (jaAdicionou != null) {
                         No aux = raiz.buscaPai(c.getTabelaForeignKeyReferencia(), raiz);

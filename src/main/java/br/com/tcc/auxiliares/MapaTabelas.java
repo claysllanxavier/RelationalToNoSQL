@@ -9,10 +9,16 @@ import java.util.Map;
 
 public class MapaTabelas {
 
-    public Map<String, Object> converterToMap(Tabela tabela, ResultSet tupla) throws SQLException {
+    public Map<String, Object> converterToMap(Tabela tabela, ResultSet tupla, No pai) throws SQLException {
         Map<String, Object> mapTabela = new HashMap<>();
+        boolean isFilho = false;
+        for(No filho : pai.getFilho()){
+            if(filho.getNomeTabela().equalsIgnoreCase(tabela.getNome())){
+                isFilho = true;
+            }
+        }
         for (Coluna coluna : tabela.getColunas()) {
-            if (coluna.isChavePrimaria()) {
+            if (coluna.isChavePrimaria() && isFilho) {
                 mapTabela.put("_id", tupla.getInt(coluna.getNome()));
             } else {
                 switch (coluna.getTipoColuna().toUpperCase()) {

@@ -5,8 +5,8 @@ public class Coluna {
     private String nome;
     private String tipoColuna;
     private boolean chavePrimaria;
-    private boolean eUnica = false;
-    private boolean eChaveEstrangeira = false;
+    private boolean isUnica = false;
+    private boolean isChaveEstrangeira = false;
     private String tabelaForeignKeyReferencia;
     private String colunaForeignKeyReferencia;
 
@@ -18,12 +18,12 @@ public class Coluna {
         this.colunaForeignKeyReferencia = colunaForeignKeyReferencia;
     }
 
-    public boolean eChaveEstrangeira() {
-        return eChaveEstrangeira;
+    public boolean isChaveEstrangeira() {
+        return isChaveEstrangeira;
     }
 
     public void seteChaveEstrangeira(boolean eChaveEstrangeira) {
-        this.eChaveEstrangeira = eChaveEstrangeira;
+        this.isChaveEstrangeira = eChaveEstrangeira;
     }
 
     public String getTabelaForeignKeyReferencia() {
@@ -34,12 +34,12 @@ public class Coluna {
         this.tabelaForeignKeyReferencia = tabelaForeignKeyReferencia;
     }
 
-    public boolean eUnica() {
-        return eUnica;
+    public boolean isUnica() {
+        return isUnica;
     }
 
     public void seteUnica(boolean eUnica) {
-        this.eUnica = eUnica;
+        this.isUnica = eUnica;
     }
 
     public String getNome() {

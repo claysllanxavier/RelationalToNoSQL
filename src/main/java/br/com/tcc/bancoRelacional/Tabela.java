@@ -1,6 +1,5 @@
 package br.com.tcc.bancoRelacional;
 
-
 import java.util.ArrayList;
 
 public class Tabela {
