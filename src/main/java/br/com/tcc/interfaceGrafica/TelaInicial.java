@@ -180,9 +180,8 @@ public class TelaInicial extends javax.swing.JFrame {
         jPanelAba1Layout.setVerticalGroup(
             jPanelAba1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelAba1Layout.createSequentialGroup()
-                .addContainerGap(246, Short.MAX_VALUE)
-                .addComponent(jButtonProsseguirTela1)
-                .addContainerGap())
+                .addGap(0, 258, Short.MAX_VALUE)
+                .addComponent(jButtonProsseguirTela1))
             .addGroup(jPanelAba1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(jPanelAba1Layout.createSequentialGroup()
                     .addContainerGap()
@@ -498,7 +497,7 @@ public class TelaInicial extends javax.swing.JFrame {
                 || jTextFieldBanco.getText().trim().equals("")) {
             JOptionPane.showMessageDialog(null, "Informe todos os campos obrigratórios!", "ERRO", JOptionPane.ERROR_MESSAGE);
         } else {
-            String tipoBanco = JComboboxBanco.getItemAt(WIDTH);
+            String tipoBanco = JComboboxBanco.getSelectedItem().toString();
             String local = jTextFieldLocal.getText();
             String porta = jTextFieldPorta.getText();
             String nomeBanco = jTextFieldBanco.getText();
@@ -514,6 +513,8 @@ public class TelaInicial extends javax.swing.JFrame {
                     mostrarTabelas(bd);
                 } catch (SQLException ex) {
                     Logger.getLogger(TelaInicial.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (NumberFormatException n) {
+                    JOptionPane.showMessageDialog(null, "A porta informada está incorreta!", "ERRO", JOptionPane.ERROR_MESSAGE);
                 }
             }
         }
@@ -672,8 +673,8 @@ public class TelaInicial extends javax.swing.JFrame {
         }
         return raiz;
     }
-    
-    public void atualizaAreaInformacoes(String str){
+
+    public void atualizaAreaInformacoes(String str) {
         jTextAreaInformacoes.append(str);
     }
 
@@ -705,10 +706,8 @@ public class TelaInicial extends javax.swing.JFrame {
         //</editor-fold>
 
         /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new TelaInicial().setVisible(true);
-            }
+        java.awt.EventQueue.invokeLater(() -> {
+            new TelaInicial().setVisible(true);
         });
     }
     ModeloTabela modelo = new ModeloTabela();
@@ -716,7 +715,7 @@ public class TelaInicial extends javax.swing.JFrame {
     ConexaoMongoDB mongoConexao;
     Conexao conexaoRelacional;
     String bancoDestino;
-   
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox<String> JComboboxBanco;
     private javax.swing.JMenuItem btSair;

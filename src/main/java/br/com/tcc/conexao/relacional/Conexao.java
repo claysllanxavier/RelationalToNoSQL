@@ -23,23 +23,32 @@ public final class Conexao {
     String str_conexao;
     String driverjdbc;
 
-    public Conexao(){}
-    
+    public Conexao() {
+    }
+
     public Conexao(String tipoBanco, String local, String porta,
             String nomeBanco, String usuario, String senha) {
-        if (tipoBanco.equals("PostgreSql")) {
-            setLocal(local);
-            setUsuario(usuario);
-            setSenha(senha);
-            setStr_conexao("jdbc:postgresql://" + local + ":" + porta + "/" + nomeBanco);
-            setDriverjdbc("org.postgresql.Driver");;
-
-        } else if (tipoBanco.equals("MySQL")) {
-            setLocal(local);
-            setUsuario(usuario);
-            setSenha(senha);
-            setStr_conexao("jdbc:mysql://" + local + ":" + porta + "/" + nomeBanco+"?autoReconnect=true&useSSL=false");
-            setDriverjdbc("com.mysql.jdbc.Driver");
+        switch (tipoBanco) {
+            case "PostgreSQL":
+                setLocal(local);
+                setUsuario(usuario);
+                setSenha(senha);
+                setStr_conexao("jdbc:postgresql://" + local + ":" + porta + "/" + nomeBanco);
+                setDriverjdbc("org.postgresql.Driver");
+                ;
+                break;
+            case "MySQL":
+                setLocal(local);
+                setUsuario(usuario);
+                setSenha(senha);
+                setStr_conexao("jdbc:mysql://" + local + ":" + porta + "/" + nomeBanco + "?autoReconnect=true&useSSL=false");
+                setDriverjdbc("com.mysql.jdbc.Driver");
+                break;
+            default:
+                JOptionPane.showMessageDialog(null,"Desculpa, mas não oferecemos suporte para esse banco de dados ainda!",
+                        "Desculpe-nos",
+                        JOptionPane.INFORMATION_MESSAGE);
+                break;
         }
 
     }
@@ -49,8 +58,8 @@ public final class Conexao {
             Class.forName(getDriverjdbc());
             setC(DriverManager.getConnection(getStr_conexao(), getUsuario(), getSenha()));
             setStatment(getC().createStatement());
-           JOptionPane.showMessageDialog (null, "O banco de dados foi conectado com sucesso!", "Conexão", JOptionPane.INFORMATION_MESSAGE);
-           return true;
+            JOptionPane.showMessageDialog(null, "O banco de dados foi conectado com sucesso!", "Conexão", JOptionPane.INFORMATION_MESSAGE);
+            return true;
 
         } catch (ClassNotFoundException | SQLException e) {
             JOptionPane.showMessageDialog(null, "Dados Incorretos!"
