@@ -20,6 +20,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 
 /**
  *
@@ -180,7 +181,7 @@ public class TelaInicial extends javax.swing.JFrame {
         jPanelAba1Layout.setVerticalGroup(
             jPanelAba1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelAba1Layout.createSequentialGroup()
-                .addGap(0, 258, Short.MAX_VALUE)
+                .addGap(0, 260, Short.MAX_VALUE)
                 .addComponent(jButtonProsseguirTela1))
             .addGroup(jPanelAba1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(jPanelAba1Layout.createSequentialGroup()
@@ -272,7 +273,7 @@ public class TelaInicial extends javax.swing.JFrame {
                     .addComponent(jLabelInformacoes, javax.swing.GroupLayout.PREFERRED_SIZE, 46, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButtonSelecionarTodas))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 167, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 166, Short.MAX_VALUE)
                 .addGap(18, 18, 18)
                 .addComponent(jButtonProsseguirTela2)
                 .addContainerGap())
@@ -365,7 +366,7 @@ public class TelaInicial extends javax.swing.JFrame {
                 .addGroup(jPanelAba3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel13)
                     .addComponent(jTextFieldSenhaBancoDestino, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 46, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 48, Short.MAX_VALUE)
                 .addComponent(jButtonProsseguirTela3)
                 .addGap(22, 22, 22))
         );
@@ -374,7 +375,7 @@ public class TelaInicial extends javax.swing.JFrame {
 
         jProgressBarMigracao.setToolTipText("");
         jProgressBarMigracao.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
-        jProgressBarMigracao.setStringPainted(true);
+        jProgressBarMigracao.setIndeterminate(true);
 
         jLabel9.setText("Processo:");
 
@@ -560,34 +561,38 @@ public class TelaInicial extends javax.swing.JFrame {
 
     private void jButtonProsseguirTela3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonProsseguirTela3ActionPerformed
         if (verificarBancoDestino()) {
+            jTabbedPane1.setSelectedIndex(3);
             JOptionPane.showMessageDialog(null, "Banco de dados Destino Conectado!", "Informação", JOptionPane.INFORMATION_MESSAGE);
             JOptionPane.showMessageDialog(null, "O processo de migração será iniciado!", "Informação", JOptionPane.INFORMATION_MESSAGE);
-            jTabbedPane1.setSelectedIndex(3);
             jTextAreaInformacoes.setText("Migrando banco de dados...");
             if (bancoDestino.equals("MongoDB")) {
-                MongodbDAO mongo = new MongodbDAO(mongoConexao.getMongoClient());
-                No arvore = criaArvore(bd);
-                try {
-                    atualizaAreaInformacoes("Criando Banco de dados: " + jTextFieldBanco.getText());
-                    atualizaAreaInformacoes("\nMigrando tabelas e dados...");
-                    mongo.migrarDados(conexaoRelacional, bd, jTextFieldBanco.getText(), arvore);
-                    atualizaAreaInformacoes("\nTabelas e dados migrados...");
-                    atualizaAreaInformacoes("\nTratando os relacionamentos das tabelas...");
-                    mongo.trataRelacionamentos(bd, arvore, jTextFieldBanco.getText());
-                    atualizaAreaInformacoes("\nRelaciomanetos concluidos...");
-                    atualizaAreaInformacoes("\nRemovendo itens desnecessários...");
-                    mongo.removeTabelas(bd, arvore, jTextFieldBanco.getText());
-                    atualizaAreaInformacoes("\nBanco de dados migrado com sucesso...");
-                    jToggleButtonConcluir.setEnabled(true);
-                } catch (SQLException ex) {
-                    Logger.getLogger(TelaInicial.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                SwingUtilities.invokeLater(() -> {
+                    MongodbDAO mongo = new MongodbDAO(mongoConexao.getMongoClient());
+                    No arvore = criaArvore(bd);
+                    try {
+                        atualizaAreaInformacoes("Criando Banco de dados: " + jTextFieldBanco.getText());
+                        atualizaAreaInformacoes("\nMigrando tabelas e dados...");
+                        mongo.migrarDados(conexaoRelacional, bd, jTextFieldBanco.getText(), arvore);
+                        atualizaAreaInformacoes("\nTabelas e dados migrados...");
+                        atualizaAreaInformacoes("\nTratando os relacionamentos das tabelas...");
+                        mongo.trataRelacionamentos(bd, arvore, jTextFieldBanco.getText());
+                        atualizaAreaInformacoes("\nRelaciomanetos concluidos...");
+                        atualizaAreaInformacoes("\nBanco de dados migrado com sucesso...");
+                        jProgressBarMigracao.setStringPainted(true);
+                        jProgressBarMigracao.setString("Migração Completa.");
+                        jProgressBarMigracao.setIndeterminate(false);
+                        jToggleButtonConcluir.setEnabled(true);
+                    } catch (SQLException ex) {
+                        Logger.getLogger(TelaInicial.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                });
             }
         }
     }//GEN-LAST:event_jButtonProsseguirTela3ActionPerformed
 
     private void jToggleButtonConcluirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButtonConcluirActionPerformed
-        // TODO add your handling code here:
+        setVisible(false);
+        dispose();
     }//GEN-LAST:event_jToggleButtonConcluirActionPerformed
 
     public void mostrarTabelas(Banco bd) {
@@ -645,7 +650,9 @@ public class TelaInicial extends javax.swing.JFrame {
                             achou = true;
                         } else {
                             jaAdicionou.getFilho().add(aux);
-                            aux.getPai().getFilho().remove(aux);
+                            if (aux.getPai().getNomeTabela().equalsIgnoreCase("root")) {
+                                aux.getPai().getFilho().remove(aux);
+                            }
                             achou = true;
                         }
                     } else {
@@ -655,9 +662,14 @@ public class TelaInicial extends javax.swing.JFrame {
                             raiz.addFilho(filho, c.getTabelaForeignKeyReferencia());
                             achou = true;
                         } else {
-                            No pai = aux.getPai().addFilho(aux.getPai(), t.getNome());
-                            pai.getFilho().add(aux);
-                            aux.getPai().getFilho().remove(aux);
+                            if (aux.getPai().getNomeTabela().equalsIgnoreCase("root")) {
+                                No pai = aux.getPai().addFilho(aux.getPai(), t.getNome());
+                                pai.getFilho().add(aux);
+                                aux.getPai().getFilho().remove(aux);
+                            } else {
+                                No pai = aux.getPai().addFilho(aux.getPai().getPai(), t.getNome());
+                                pai.getFilho().add(aux);
+                            }
                             achou = true;
                         }
                     }
@@ -694,15 +706,11 @@ public class TelaInicial extends javax.swing.JFrame {
                     break;
                 }
             }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(TelaInicial.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(TelaInicial.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(TelaInicial.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
             java.util.logging.Logger.getLogger(TelaInicial.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
+        //</editor-fold>
+        
         //</editor-fold>
 
         /* Create and display the form */

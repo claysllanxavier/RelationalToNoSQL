@@ -18,9 +18,6 @@ public class MapaTabelas {
             }
         }
         for (Coluna coluna : tabela.getColunas()) {
-            if (coluna.isChavePrimaria() && isFilho) {
-                mapTabela.put("_id", tupla.getInt(coluna.getNome()));
-            } else {
                 switch (coluna.getTipoColuna().toUpperCase()) {
                     case "TINYINT":
                     case "TINYINT UNSIGNED":
@@ -54,7 +51,6 @@ public class MapaTabelas {
                         mapTabela.put(coluna.getNome(), tupla.getString(coluna.getNome()));
                         break;
                 }
-            }
         }
 
         return mapTabela;

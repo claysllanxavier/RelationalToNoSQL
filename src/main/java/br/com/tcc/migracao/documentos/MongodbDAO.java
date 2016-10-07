@@ -62,6 +62,7 @@ public class MongodbDAO {
 
     public void trataRelacionamentos(Banco banco, No pai, String nomeBanco) throws SQLException {
         criarBanco(nomeBanco);
+        System.out.println("Tratando relacionamentos");
         for (No filho : pai.getFilho()) {
             trataRelacionamentos(banco, filho, nomeBanco);
             for (Tabela tabela : banco.getTabelas()) {
@@ -72,26 +73,29 @@ public class MongodbDAO {
                             while (cursor.hasNext()) {
                                 DBObject obj = cursor.next();
                                 BasicDBObject searchQuery = new BasicDBObject().append("_id", obj.get("_id"));
-                                int result = (int) obj.get(coluna.getNome());
                                 BasicDBObject whereQuery = new BasicDBObject();
-                                whereQuery.put(coluna.getColunaForeignKeyReferencia(), result);
-                                DBCursor cursorAux = getColl(coluna.getTabelaForeignKeyReferencia()).find(whereQuery);
-                                ArrayList<Object> lista = new BasicDBList();
-                                while (cursorAux.hasNext()) {
-                                    lista.add(cursorAux.next());
-                                }
-                                if (lista.size() == 1) {
-                                    BasicDBObject doc1 = new BasicDBObject();
-                                    doc1.put(coluna.getTabelaForeignKeyReferencia(), lista.get(0));
-                                    getColl(filho.getNomeTabela()).update(searchQuery, new BasicDBObject("$set", doc1));
-                                    getColl(filho.getNomeTabela()).update(searchQuery, new BasicDBObject("$unset", new BasicDBObject(coluna.getNome(), "")));
-                                    getColl(filho.getNomeTabela()).update(searchQuery, new BasicDBObject("$unset", new BasicDBObject(coluna.getTabelaForeignKeyReferencia() + "._id", "")));
-                                } else {
-                                    BasicDBObject doc1 = new BasicDBObject();
-                                    doc1.put(coluna.getTabelaForeignKeyReferencia(), lista);
-                                    getColl(filho.getNomeTabela()).update(searchQuery, new BasicDBObject("$set", doc1));
-                                    getColl(filho.getNomeTabela()).update(searchQuery, new BasicDBObject("$unset", new BasicDBObject(coluna.getNome(), "")));
-                                    getColl(filho.getNomeTabela()).update(searchQuery, new BasicDBObject("$unset", new BasicDBObject(coluna.getTabelaForeignKeyReferencia() + "._id", "")));
+                                if (obj.get(coluna.getNome()) != null) {
+                                    whereQuery.put(coluna.getColunaForeignKeyReferencia(), obj.get(coluna.getNome()));
+                                    DBCursor cursorAux = getColl(coluna.getTabelaForeignKeyReferencia()).find(whereQuery);
+                                    ArrayList<Object> lista = new BasicDBList();
+                                    while (cursorAux.hasNext()) {
+                                        lista.add(cursorAux.next());
+                                    }
+                                    if (!lista.isEmpty()) {
+                                        if (lista.size() == 1) {
+                                            BasicDBObject doc1 = new BasicDBObject();
+                                            doc1.put(coluna.getTabelaForeignKeyReferencia(), lista.get(0));
+                                            getColl(filho.getNomeTabela()).update(searchQuery, new BasicDBObject("$set", doc1));
+                                            getColl(filho.getNomeTabela()).update(searchQuery, new BasicDBObject("$unset", new BasicDBObject(coluna.getNome(), "")));
+                                            getColl(filho.getNomeTabela()).update(searchQuery, new BasicDBObject("$unset", new BasicDBObject(coluna.getTabelaForeignKeyReferencia() + "._id", "")));
+                                        } else {
+                                            BasicDBObject doc1 = new BasicDBObject();
+                                            doc1.put(coluna.getTabelaForeignKeyReferencia(), lista);
+                                            getColl(filho.getNomeTabela()).update(searchQuery, new BasicDBObject("$set", doc1));
+                                            getColl(filho.getNomeTabela()).update(searchQuery, new BasicDBObject("$unset", new BasicDBObject(coluna.getNome(), "")));
+                                            getColl(filho.getNomeTabela()).update(searchQuery, new BasicDBObject("$unset", new BasicDBObject(coluna.getTabelaForeignKeyReferencia() + "._id", "")));
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -102,8 +106,10 @@ public class MongodbDAO {
     }
 
     public void migrarDados(Conexao c, Banco banco, String nomeBanco, No arvore) throws SQLException {
+        System.out.println("Criou o banco de dados: " + nomeBanco);
         criarBanco(nomeBanco);
         for (Tabela tabela : banco.getTabelas()) {
+            System.out.println("Criou a coleção" + tabela.getNome());
             criarColecao(tabela.getNome());
             int valor_salvo = 1;
             int subPartes = 10;
@@ -111,9 +117,9 @@ public class MongodbDAO {
 
             long total = 20198310;
             long sub_total = total / subPartes;
-
+            System.out.println("Transferindo dados...");
             for (int i = 0; i < subPartes; i++) {
-                String sql = "SELECT * FROM " + tabela.getNome() + " LIMIT " + inicio + "," + sub_total;
+                String sql = "SELECT * FROM " + tabela.getNome() + " LIMIT 10" + inicio + "," + sub_total;
                 try (PreparedStatement stmt = c.getC().prepareStatement(sql)) {
                     ResultSet resultado = stmt.executeQuery();
                     while (resultado.next()) {
@@ -124,15 +130,6 @@ public class MongodbDAO {
                 inicio = inicio + sub_total;
             }
         }
-    }
-    public void removeTabelas(Banco db, No arvore, String nomeBanco){
-               criarBanco(nomeBanco);
-               for(No filho: arvore.getFilho()){
-                   for(Tabela tb : db.getTabelas()){
-                       if(!filho.getNomeTabela().equalsIgnoreCase(tb.getNome())){
-                           getColl(tb.getNome()).drop();
-                       }
-                   }
-               }
+        System.out.println("Dados transferidos!");
     }
 }
