@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package br.com.tcc.migracao.documentos;
 
 import br.com.tcc.auxiliares.MapaTabelas;
@@ -25,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JOptionPane;
 
 /**
  *
@@ -121,7 +115,7 @@ public class MongodbDAO {
             long sub_total = total / subPartes;
             System.out.println("Transferindo dados...");
             for (int i = 0; i < subPartes; i++) {
-                String sql = "SELECT * FROM " + tabela.getNome() + " LIMIT 10" + inicio + "," + sub_total;
+                String sql = "SELECT * FROM " + tabela.getNome() + " LIMIT " + inicio + "," + sub_total;
                 try (PreparedStatement stmt = c.getC().prepareStatement(sql)) {
                     ResultSet resultado = stmt.executeQuery();
                     while (resultado.next()) {
@@ -133,7 +127,7 @@ public class MongodbDAO {
         }
         System.out.println("Dados transferidos!");
     }
-    public boolean validar(Conexao c, Banco banco, String nomeBanco){
+    public boolean validar(Conexao c, Banco banco, String nomeBanco) throws SQLException{
        criarBanco(nomeBanco);
        for (Tabela tabela : banco.getTabelas()) {
           long resultSQL  = 0;
@@ -146,12 +140,10 @@ public class MongodbDAO {
                     }
                     resultMongo = getColl(tabela.getNome()).count();
                     if(resultSQL ==  resultMongo){
-                       return false;
+                       return true;
                     }
-                } catch (SQLException ex) { 
-               Logger.getLogger(MongodbDAO.class.getName()).log(Level.SEVERE, null, ex);
-           } 
+                }
        }
-       return true;     
+       return false;     
     }
 }

@@ -11,6 +11,7 @@ import br.com.tcc.conexao.nosql.documentos.ConexaoMongoDB;
 import br.com.tcc.migracao.documentos.MongodbDAO;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultComboBoxModel;
@@ -579,7 +580,7 @@ public class TelaInicial extends javax.swing.JFrame {
                             mongo.trataRelacionamentos(bd, arvore, jTextFieldBanco.getText());
                             atualizaAreaInformacoes("\nRelaciomanetos concluidos...");
                             atualizaAreaInformacoes("\nValidando tabelas migradas");
-                            if (mongo.validar(conexaoRelacional, bd, bancoDestino)) {
+                            if (mongo.validar(conexaoRelacional, bd, jTextFieldBanco.getText())) {
                                 atualizaAreaInformacoes("\nBanco de dados migrado com sucesso...");
                                 jProgressBarMigracao.setStringPainted(true);
                                 jProgressBarMigracao.setString("Migração Completa.");
@@ -588,7 +589,7 @@ public class TelaInicial extends javax.swing.JFrame {
                             } else {
                                 JOptionPane.showMessageDialog(null, "Erro na migração. Refaça a operação.", "ERRO", JOptionPane.ERROR_MESSAGE);
                             }
-                            atualizaAreaInformacoes("\nTempo Total: " + (System.currentTimeMillis() - tempoInicio) + " segundos");
+                            atualizaAreaInformacoes("\nTempo Total: " + TimeUnit.MILLISECONDS.toMinutes(System.currentTimeMillis() - tempoInicio) + " minutos");
                         } catch (SQLException ex) {
                             Logger.getLogger(TelaInicial.class.getName()).log(Level.SEVERE, null, ex);
                         }

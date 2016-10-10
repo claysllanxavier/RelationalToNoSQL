@@ -11,12 +11,6 @@ public class MapaTabelas {
 
     public Map<String, Object> converterToMap(Tabela tabela, ResultSet tupla, No pai) throws SQLException {
         Map<String, Object> mapTabela = new HashMap<>();
-        boolean isFilho = false;
-        for(No filho : pai.getFilho()){
-            if(filho.getNomeTabela().equalsIgnoreCase(tabela.getNome())){
-                isFilho = true;
-            }
-        }
         for (Coluna coluna : tabela.getColunas()) {
                 switch (coluna.getTipoColuna().toUpperCase()) {
                     case "TINYINT":
@@ -27,7 +21,7 @@ public class MapaTabelas {
                     case "MEDIUMINT UNSIGNED":
                     case "BIGINT":
                     case "BIGINT UNSIGNED":
-                        mapTabela.put(coluna.getNome(), tupla.getLong(coluna.getNome()));
+                        mapTabela.put(coluna.getNome(), tupla.getInt(coluna.getNome()));
                         break;
                     case "DECIMAL":
                     case "FLOAT":
