@@ -23,6 +23,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -111,7 +114,6 @@ public class MongodbDAO {
         for (Tabela tabela : banco.getTabelas()) {
             System.out.println("Criou a coleção" + tabela.getNome());
             criarColecao(tabela.getNome());
-            int valor_salvo = 1;
             int subPartes = 10;
             long inicio = 0;
 
@@ -124,12 +126,32 @@ public class MongodbDAO {
                     ResultSet resultado = stmt.executeQuery();
                     while (resultado.next()) {
                         save(tabela, resultado, arvore);
-                        valor_salvo++;
                     }
                 }
                 inicio = inicio + sub_total;
             }
         }
         System.out.println("Dados transferidos!");
+    }
+    public boolean validar(Conexao c, Banco banco, String nomeBanco){
+       criarBanco(nomeBanco);
+       for (Tabela tabela : banco.getTabelas()) {
+          long resultSQL  = 0;
+          long resultMongo = 0;
+          String sql = "SELECT count(*) FROM " + tabela.getNome();
+                try (PreparedStatement stmt = c.getC().prepareStatement(sql)) {
+                    ResultSet resultado = stmt.executeQuery();
+                    while (resultado.next()) {
+                       resultSQL = resultado.getLong(1);
+                    }
+                    resultMongo = getColl(tabela.getNome()).count();
+                    if(resultSQL ==  resultMongo){
+                       return false;
+                    }
+                } catch (SQLException ex) { 
+               Logger.getLogger(MongodbDAO.class.getName()).log(Level.SEVERE, null, ex);
+           } 
+       }
+       return true;     
     }
 }

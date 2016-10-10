@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package br.com.tcc.interfaceGrafica;
 
 import br.com.tcc.bancoRelacional.Banco;
@@ -375,7 +370,6 @@ public class TelaInicial extends javax.swing.JFrame {
 
         jProgressBarMigracao.setToolTipText("");
         jProgressBarMigracao.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
-        jProgressBarMigracao.setIndeterminate(true);
 
         jLabel9.setText("Processo:");
 
@@ -566,24 +560,38 @@ public class TelaInicial extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(null, "O processo de migração será iniciado!", "Informação", JOptionPane.INFORMATION_MESSAGE);
             jTextAreaInformacoes.setText("Migrando banco de dados...");
             if (bancoDestino.equals("MongoDB")) {
-                SwingUtilities.invokeLater(() -> {
-                    MongodbDAO mongo = new MongodbDAO(mongoConexao.getMongoClient());
-                    No arvore = criaArvore(bd);
-                    try {
-                        atualizaAreaInformacoes("Criando Banco de dados: " + jTextFieldBanco.getText());
-                        atualizaAreaInformacoes("\nMigrando tabelas e dados...");
-                        mongo.migrarDados(conexaoRelacional, bd, jTextFieldBanco.getText(), arvore);
-                        atualizaAreaInformacoes("\nTabelas e dados migrados...");
-                        atualizaAreaInformacoes("\nTratando os relacionamentos das tabelas...");
-                        mongo.trataRelacionamentos(bd, arvore, jTextFieldBanco.getText());
-                        atualizaAreaInformacoes("\nRelaciomanetos concluidos...");
-                        atualizaAreaInformacoes("\nBanco de dados migrado com sucesso...");
-                        jProgressBarMigracao.setStringPainted(true);
-                        jProgressBarMigracao.setString("Migração Completa.");
-                        jProgressBarMigracao.setIndeterminate(false);
-                        jToggleButtonConcluir.setEnabled(true);
-                    } catch (SQLException ex) {
-                        Logger.getLogger(TelaInicial.class.getName()).log(Level.SEVERE, null, ex);
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        jProgressBarMigracao.setIndeterminate(true);
+                    }
+                });
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        MongodbDAO mongo = new MongodbDAO(mongoConexao.getMongoClient());
+                        No arvore = criaArvore(bd);
+                        long tempoInicio = System.currentTimeMillis();
+                        try {
+                            atualizaAreaInformacoes("Criando Banco de dados: " + jTextFieldBanco.getText());
+                            atualizaAreaInformacoes("\nMigrando tabelas e dados...");
+                            mongo.migrarDados(conexaoRelacional, bd, jTextFieldBanco.getText(), arvore);
+                            atualizaAreaInformacoes("\nTabelas e dados migrados...");
+                            atualizaAreaInformacoes("\nTratando os relacionamentos das tabelas...");
+                            mongo.trataRelacionamentos(bd, arvore, jTextFieldBanco.getText());
+                            atualizaAreaInformacoes("\nRelaciomanetos concluidos...");
+                            atualizaAreaInformacoes("\nValidando tabelas migradas");
+                            if (mongo.validar(conexaoRelacional, bd, bancoDestino)) {
+                                atualizaAreaInformacoes("\nBanco de dados migrado com sucesso...");
+                                jProgressBarMigracao.setStringPainted(true);
+                                jProgressBarMigracao.setString("Migração Completa.");
+                                jProgressBarMigracao.setIndeterminate(false);
+                                jToggleButtonConcluir.setEnabled(true);
+                            } else {
+                                JOptionPane.showMessageDialog(null, "Erro na migração. Refaça a operação.", "ERRO", JOptionPane.ERROR_MESSAGE);
+                            }
+                            atualizaAreaInformacoes("\nTempo Total: " + (System.currentTimeMillis() - tempoInicio) + " segundos");
+                        } catch (SQLException ex) {
+                            Logger.getLogger(TelaInicial.class.getName()).log(Level.SEVERE, null, ex);
+                        }
                     }
                 });
             }
@@ -710,7 +718,7 @@ public class TelaInicial extends javax.swing.JFrame {
             java.util.logging.Logger.getLogger(TelaInicial.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
-        
+
         //</editor-fold>
 
         /* Create and display the form */
