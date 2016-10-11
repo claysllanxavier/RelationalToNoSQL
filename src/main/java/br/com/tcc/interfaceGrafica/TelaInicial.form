@@ -548,7 +548,6 @@
                               <Component id="jLabel9" min="-2" max="-2" attributes="0"/>
                               <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                           </Group>
-                          <Component id="jProgressBarMigracao" max="32767" attributes="0"/>
                           <Group type="102" alignment="1" attributes="0">
                               <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                               <Component id="jToggleButtonConcluir" min="-2" max="-2" attributes="0"/>
@@ -564,31 +563,18 @@
                       <EmptySpace min="-2" pref="23" max="-2" attributes="0"/>
                       <Component id="jLabel9" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="jProgressBarMigracao" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace type="separate" max="-2" attributes="0"/>
-                      <Component id="jScrollPane2" min="-2" pref="148" max="-2" attributes="0"/>
+                      <Component id="jScrollPane2" min="-2" pref="180" max="-2" attributes="0"/>
                       <EmptySpace type="separate" max="-2" attributes="0"/>
                       <Component id="jToggleButtonConcluir" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace max="32767" attributes="0"/>
+                      <EmptySpace pref="16" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
           </Layout>
           <SubComponents>
-            <Component class="javax.swing.JProgressBar" name="jProgressBarMigracao">
-              <Properties>
-                <Property name="toolTipText" type="java.lang.String" value=""/>
-                <Property name="cursor" type="java.awt.Cursor" editor="org.netbeans.modules.form.editors2.CursorEditor">
-                  <Color id="Cursor Padr&#xe3;o"/>
-                </Property>
-              </Properties>
-              <AuxValues>
-                <AuxValue name="JavaCodeGenerator_SerializeTo" type="java.lang.String" value="TelaInicial_jProgressBarMigracao"/>
-              </AuxValues>
-            </Component>
             <Component class="javax.swing.JLabel" name="jLabel9">
               <Properties>
-                <Property name="text" type="java.lang.String" value="Processo:"/>
+                <Property name="text" type="java.lang.String" value="Informa&#xe7;&#xf5;es:"/>
               </Properties>
             </Component>
             <Container class="javax.swing.JScrollPane" name="jScrollPane2">

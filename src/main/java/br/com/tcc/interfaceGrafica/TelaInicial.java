@@ -16,7 +16,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
 
 /**
  *
@@ -77,7 +76,6 @@ public class TelaInicial extends javax.swing.JFrame {
         jTextFieldSenhaBancoDestino = new javax.swing.JTextField();
         jButtonProsseguirTela3 = new javax.swing.JButton();
         jPanelAba4 = new javax.swing.JPanel();
-        jProgressBarMigracao = new javax.swing.JProgressBar();
         jLabel9 = new javax.swing.JLabel();
         jScrollPane2 = new javax.swing.JScrollPane();
         jTextAreaInformacoes = new javax.swing.JTextArea();
@@ -369,10 +367,7 @@ public class TelaInicial extends javax.swing.JFrame {
 
         jTabbedPane1.addTab("Destino", jPanelAba3);
 
-        jProgressBarMigracao.setToolTipText("");
-        jProgressBarMigracao.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
-
-        jLabel9.setText("Processo:");
+        jLabel9.setText("Informações:");
 
         jTextAreaInformacoes.setEditable(false);
         jTextAreaInformacoes.setColumns(20);
@@ -398,7 +393,6 @@ public class TelaInicial extends javax.swing.JFrame {
                     .addGroup(jPanelAba4Layout.createSequentialGroup()
                         .addComponent(jLabel9)
                         .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(jProgressBarMigracao, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelAba4Layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(jToggleButtonConcluir)))
@@ -410,12 +404,10 @@ public class TelaInicial extends javax.swing.JFrame {
                 .addGap(23, 23, 23)
                 .addComponent(jLabel9)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jProgressBarMigracao, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 148, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(jToggleButtonConcluir)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(16, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("Migração", jPanelAba4);
@@ -557,44 +549,32 @@ public class TelaInicial extends javax.swing.JFrame {
     private void jButtonProsseguirTela3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonProsseguirTela3ActionPerformed
         if (verificarBancoDestino()) {
             jTabbedPane1.setSelectedIndex(3);
+            jTextAreaInformacoes.setText("Migrando banco de dados...");
             JOptionPane.showMessageDialog(null, "Banco de dados Destino Conectado!", "Informação", JOptionPane.INFORMATION_MESSAGE);
             JOptionPane.showMessageDialog(null, "O processo de migração será iniciado!", "Informação", JOptionPane.INFORMATION_MESSAGE);
-            jTextAreaInformacoes.setText("Migrando banco de dados...");
             if (bancoDestino.equals("MongoDB")) {
-                SwingUtilities.invokeLater(new Runnable() {
-                    public void run() {
-                        jProgressBarMigracao.setIndeterminate(true);
+                MongodbDAO mongo = new MongodbDAO(mongoConexao.getMongoClient());
+                No arvore = criaArvore(bd);
+                long tempoInicio = System.currentTimeMillis();
+                try {
+                    atualizaAreaInformacoes("Criando Banco de dados: " + jTextFieldBanco.getText());
+                    atualizaAreaInformacoes("\nMigrando tabelas e dados...");
+                    mongo.migrarDados(conexaoRelacional, bd, jTextFieldBanco.getText(), arvore);
+                    atualizaAreaInformacoes("\nTabelas e dados migrados...");
+                    atualizaAreaInformacoes("\nTratando os relacionamentos das tabelas...");
+                    mongo.trataRelacionamentos(bd, arvore, jTextFieldBanco.getText());
+                    atualizaAreaInformacoes("\nRelaciomanetos concluidos...");
+                    atualizaAreaInformacoes("\nValidando tabelas migradas");
+                    if (mongo.validar(conexaoRelacional, bd, jTextFieldBanco.getText())) {
+                        atualizaAreaInformacoes("\nBanco de dados migrado com sucesso...");
+                        jToggleButtonConcluir.setEnabled(true);
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Erro na migração. Refaça a operação.", "ERRO", JOptionPane.ERROR_MESSAGE);
                     }
-                });
-                SwingUtilities.invokeLater(new Runnable() {
-                    public void run() {
-                        MongodbDAO mongo = new MongodbDAO(mongoConexao.getMongoClient());
-                        No arvore = criaArvore(bd);
-                        long tempoInicio = System.currentTimeMillis();
-                        try {
-                            atualizaAreaInformacoes("Criando Banco de dados: " + jTextFieldBanco.getText());
-                            atualizaAreaInformacoes("\nMigrando tabelas e dados...");
-                            mongo.migrarDados(conexaoRelacional, bd, jTextFieldBanco.getText(), arvore);
-                            atualizaAreaInformacoes("\nTabelas e dados migrados...");
-                            atualizaAreaInformacoes("\nTratando os relacionamentos das tabelas...");
-                            mongo.trataRelacionamentos(bd, arvore, jTextFieldBanco.getText());
-                            atualizaAreaInformacoes("\nRelaciomanetos concluidos...");
-                            atualizaAreaInformacoes("\nValidando tabelas migradas");
-                            if (mongo.validar(conexaoRelacional, bd, jTextFieldBanco.getText())) {
-                                atualizaAreaInformacoes("\nBanco de dados migrado com sucesso...");
-                                jProgressBarMigracao.setStringPainted(true);
-                                jProgressBarMigracao.setString("Migração Completa.");
-                                jProgressBarMigracao.setIndeterminate(false);
-                                jToggleButtonConcluir.setEnabled(true);
-                            } else {
-                                JOptionPane.showMessageDialog(null, "Erro na migração. Refaça a operação.", "ERRO", JOptionPane.ERROR_MESSAGE);
-                            }
-                            atualizaAreaInformacoes("\nTempo Total: " + TimeUnit.MILLISECONDS.toMinutes(System.currentTimeMillis() - tempoInicio) + " minutos");
-                        } catch (SQLException ex) {
-                            Logger.getLogger(TelaInicial.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-                    }
-                });
+                    atualizaAreaInformacoes("\nTempo Total: " + TimeUnit.MILLISECONDS.toMinutes(System.currentTimeMillis() - tempoInicio) + " minutos");
+                } catch (SQLException ex) {
+                    Logger.getLogger(TelaInicial.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         }
     }//GEN-LAST:event_jButtonProsseguirTela3ActionPerformed
@@ -692,6 +672,7 @@ public class TelaInicial extends javax.swing.JFrame {
             }
             achou = false;
         }
+        raiz.printTree(raiz, " ");
         return raiz;
     }
 
@@ -765,7 +746,6 @@ public class TelaInicial extends javax.swing.JFrame {
     private javax.swing.JPanel jPanelAba3;
     private javax.swing.JPanel jPanelAba4;
     private javax.swing.JPasswordField jPasswordFieldSenha;
-    private javax.swing.JProgressBar jProgressBarMigracao;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTabbedPane jTabbedPane1;
