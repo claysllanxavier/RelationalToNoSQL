@@ -6,6 +6,7 @@ import br.com.tcc.bancoRelacional.Banco;
 import br.com.tcc.bancoRelacional.Coluna;
 import br.com.tcc.bancoRelacional.Tabela;
 import br.com.tcc.conexao.relacional.Conexao;
+import br.com.tcc.interfaceGrafica.TelaInicial;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
@@ -18,6 +19,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Map;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -28,9 +30,11 @@ public class MongodbDAO {
     private final MongoClient mongoClient;
     private DB db;
     private DBCollection coll;
+    private final TelaInicial tela;
 
-    public MongodbDAO(MongoClient mongo) {
+    public MongodbDAO(MongoClient mongo, TelaInicial t) {
         this.mongoClient = mongo;
+        this.tela = t;
     }
 
     public void criarBanco(String nome) {
@@ -57,7 +61,6 @@ public class MongodbDAO {
 
     public void trataRelacionamentos(Banco banco, No pai, String nomeBanco) throws SQLException {
         criarBanco(nomeBanco);
-        System.out.println("Tratando relacionamentos");
         for (No filho : pai.getFilho()) {
             trataRelacionamentos(banco, filho, nomeBanco);
             for (Tabela tabela : banco.getTabelas()) {
@@ -101,17 +104,17 @@ public class MongodbDAO {
     }
 
     public void migrarDados(Conexao c, Banco banco, String nomeBanco, No arvore) throws SQLException {
-        System.out.println("Criou o banco de dados: " + nomeBanco);
+        tela.atualizaAreaInformacoes("Criou o banco de dados: " + nomeBanco);
         criarBanco(nomeBanco);
         for (Tabela tabela : banco.getTabelas()) {
-            System.out.println("Criou a coleção" + tabela.getNome());
+            tela.atualizaAreaInformacoes("Criou a coleção: " + tabela.getNome());
             criarColecao(tabela.getNome());
             int subPartes = 10;
             long inicio = 0;
 
             long total = 20198310;
             long sub_total = total / subPartes;
-            System.out.println("Transferindo dados...");
+            tela.atualizaAreaInformacoes("Transferindo dados...");
             for (int i = 0; i < subPartes; i++) {
                 String sql = "SELECT * FROM " + tabela.getNome() + " LIMIT " + inicio + "," + sub_total;
                 try (PreparedStatement stmt = c.getC().prepareStatement(sql)) {
@@ -122,26 +125,35 @@ public class MongodbDAO {
                 }
                 inicio = inicio + sub_total;
             }
+            tela.atualizaAreaInformacoes("Todos os dados da tabela: " + tabela.getNome() + " foram transferidos...");
+            tela.atualizaAreaInformacoes("Iniciando validação de toltal de registros...");
+            if(validarTotalRegistros(c, tabela, nomeBanco)){
+                tela.atualizaAreaInformacoes("Os dados foram migrados corretamente...");
+            }
+            else{
+                JOptionPane.showMessageDialog(null, "Ocorreu um erro na migração. Por favor refaça o processo!", "ERRO", JOptionPane.ERROR_MESSAGE);
+                tela.dispose();
+            }
         }
-        System.out.println("Dados transferidos!");
+         tela.atualizaAreaInformacoes("Todos os dados foram migrados corretamente!");
+         tela.atualizaAreaInformacoes("Iniciando o processo de tratamento dos relacionamentos!");
     }
-    public boolean validar(Conexao c, Banco banco, String nomeBanco) throws SQLException{
-       criarBanco(nomeBanco);
-       for (Tabela tabela : banco.getTabelas()) {
-          long resultSQL  = 0;
-          long resultMongo = 0;
-          String sql = "SELECT count(*) FROM " + tabela.getNome();
-                try (PreparedStatement stmt = c.getC().prepareStatement(sql)) {
-                    ResultSet resultado = stmt.executeQuery();
-                    while (resultado.next()) {
-                       resultSQL = resultado.getLong(1);
-                    }
-                    resultMongo = getColl(tabela.getNome()).count();
-                    if(resultSQL ==  resultMongo){
-                       return true;
-                    }
-                }
-       }
-       return false;     
+
+    public boolean validarTotalRegistros(Conexao c, Tabela tabela, String nomeBanco) throws SQLException {
+        criarBanco(nomeBanco);
+        long resultSQL = 0;
+        long resultMongo = 0;
+        String sql = "SELECT count(*) FROM " + tabela.getNome();
+        try (PreparedStatement stmt = c.getC().prepareStatement(sql)) {
+            ResultSet resultado = stmt.executeQuery();
+            while (resultado.next()) {
+                resultSQL = resultado.getLong(1);
+            }
+            resultMongo = getColl(tabela.getNome()).count();
+            if (resultSQL == resultMongo) {
+                return true;
+            }
+        }
+        return false;
     }
 }
