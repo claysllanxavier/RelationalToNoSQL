@@ -23,12 +23,12 @@ import javax.swing.SwingUtilities;
  *
  * @author Claysllan
  */
-public class TelaInicial extends javax.swing.JFrame {
+public class TelaMigracao extends javax.swing.JFrame {
 
     /**
      * Creates new form TelaInicial
      */
-    public TelaInicial() {
+    public TelaMigracao() {
         initComponents();
 
     }
@@ -84,12 +84,10 @@ public class TelaInicial extends javax.swing.JFrame {
         jToggleButtonConcluir = new javax.swing.JToggleButton();
         jProgressBarMigracao = new javax.swing.JProgressBar();
         jMenuBar1 = new javax.swing.JMenuBar();
-        jMenu1 = new javax.swing.JMenu();
-        btSobre = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
         btSair = new javax.swing.JMenuItem();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("RelationalToNoSQL");
         setLocation(new java.awt.Point(500, 250));
         setResizable(false);
@@ -421,19 +419,6 @@ public class TelaInicial extends javax.swing.JFrame {
 
         jTabbedPane1.addTab("Migração", jPanelAba4);
 
-        jMenu1.setText("Sobre");
-
-        btSobre.setIcon(new javax.swing.ImageIcon(getClass().getResource("/information.png"))); // NOI18N
-        btSobre.setText("Sobre");
-        btSobre.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btSobreActionPerformed(evt);
-            }
-        });
-        jMenu1.add(btSobre);
-
-        jMenuBar1.add(jMenu1);
-
         jMenu2.setText("Sair");
 
         btSair.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F4, java.awt.event.InputEvent.ALT_MASK));
@@ -463,10 +448,6 @@ public class TelaInicial extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
-    private void btSobreActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btSobreActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_btSobreActionPerformed
 
     private void JComboboxBancoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JComboboxBancoActionPerformed
         // TODO add your handling code here:
@@ -509,7 +490,7 @@ public class TelaInicial extends javax.swing.JFrame {
                     bd = m.mapearBanco();
                     mostrarTabelas(bd);
                 } catch (SQLException ex) {
-                    Logger.getLogger(TelaInicial.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(TelaMigracao.class.getName()).log(Level.SEVERE, null, ex);
                 } catch (NumberFormatException n) {
                     JOptionPane.showMessageDialog(null, "A porta informada está incorreta!", "ERRO", JOptionPane.ERROR_MESSAGE);
                 }
@@ -694,8 +675,9 @@ public class TelaInicial extends javax.swing.JFrame {
                 }
             }
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(TelaInicial.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(TelaMigracao.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
+        //</editor-fold>
         //</editor-fold>
 
         //</editor-fold>
@@ -704,7 +686,7 @@ public class TelaInicial extends javax.swing.JFrame {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 java.awt.EventQueue.invokeLater(() -> {
-                    new TelaInicial().setVisible(true);
+                    new TelaMigracao().setVisible(true);
                 });
             }
         });
@@ -718,7 +700,6 @@ public class TelaInicial extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox<String> JComboboxBanco;
     private javax.swing.JMenuItem btSair;
-    private javax.swing.JMenuItem btSobre;
     private javax.swing.JButton jButtonProsseguirTela1;
     private javax.swing.JButton jButtonProsseguirTela2;
     private javax.swing.JButton jButtonProsseguirTela3;
@@ -739,7 +720,6 @@ public class TelaInicial extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JLabel jLabelInformacoes;
-    private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JPanel jPanelAba1;

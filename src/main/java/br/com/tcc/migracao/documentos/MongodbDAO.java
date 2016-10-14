@@ -6,7 +6,7 @@ import br.com.tcc.bancoRelacional.Banco;
 import br.com.tcc.bancoRelacional.Coluna;
 import br.com.tcc.bancoRelacional.Tabela;
 import br.com.tcc.conexao.relacional.Conexao;
-import br.com.tcc.interfaceGrafica.TelaInicial;
+import br.com.tcc.interfaceGrafica.TelaMigracao;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
@@ -30,9 +30,9 @@ public class MongodbDAO {
     private final MongoClient mongoClient;
     private DB db;
     private DBCollection coll;
-    private final TelaInicial tela;
+    private final TelaMigracao tela;
 
-    public MongodbDAO(MongoClient mongo, TelaInicial t) {
+    public MongodbDAO(MongoClient mongo, TelaMigracao t) {
         this.mongoClient = mongo;
         this.tela = t;
     }
