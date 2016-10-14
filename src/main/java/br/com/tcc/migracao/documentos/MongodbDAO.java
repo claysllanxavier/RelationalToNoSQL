@@ -106,37 +106,41 @@ public class MongodbDAO {
     public void migrarDados(Conexao c, Banco banco, String nomeBanco, No arvore) throws SQLException {
         tela.atualizaAreaInformacoes("Criou o banco de dados: " + nomeBanco);
         criarBanco(nomeBanco);
-        for (Tabela tabela : banco.getTabelas()) {
-            tela.atualizaAreaInformacoes("Criou a coleção: " + tabela.getNome());
-            criarColecao(tabela.getNome());
-            int subPartes = 10;
-            long inicio = 0;
+        try {
+            for (Tabela tabela : banco.getTabelas()) {
+                tela.atualizaAreaInformacoes("Criou a coleção: " + tabela.getNome());
+                criarColecao(tabela.getNome());
+                int subPartes = 10;
+                long inicio = 0;
 
-            long total = 20198310;
-            long sub_total = total / subPartes;
-            tela.atualizaAreaInformacoes("Transferindo dados...");
-            for (int i = 0; i < subPartes; i++) {
-                String sql = "SELECT * FROM " + tabela.getNome() + " LIMIT " + inicio + "," + sub_total;
-                try (PreparedStatement stmt = c.getC().prepareStatement(sql)) {
-                    ResultSet resultado = stmt.executeQuery();
-                    while (resultado.next()) {
-                        save(tabela, resultado, arvore);
+                long total = 20198310;
+                long sub_total = total / subPartes;
+                tela.atualizaAreaInformacoes("Transferindo dados...");
+                for (int i = 0; i < subPartes; i++) {
+                    String sql = "SELECT * FROM " + tabela.getNome() + " LIMIT " + inicio + "," + sub_total;
+                    try (PreparedStatement stmt = c.getC().prepareStatement(sql)) {
+                        ResultSet resultado = stmt.executeQuery();
+                        while (resultado.next()) {
+                            save(tabela, resultado, arvore);
+                        }
                     }
+                    inicio = inicio + sub_total;
                 }
-                inicio = inicio + sub_total;
+                tela.atualizaAreaInformacoes("Todos os dados da tabela: " + tabela.getNome() + " foram transferidos...");
+                tela.atualizaAreaInformacoes("Iniciando validação de toltal de registros...");
+                if (validarTotalRegistros(c, tabela, nomeBanco)) {
+                    tela.atualizaAreaInformacoes("Os dados foram migrados corretamente...");
+                } else {
+                    JOptionPane.showMessageDialog(null, "Ocorreu um erro na migração. Por favor refaça o processo!", "ERRO", JOptionPane.ERROR_MESSAGE);
+                    tela.dispose();
+                }
             }
-            tela.atualizaAreaInformacoes("Todos os dados da tabela: " + tabela.getNome() + " foram transferidos...");
-            tela.atualizaAreaInformacoes("Iniciando validação de toltal de registros...");
-            if(validarTotalRegistros(c, tabela, nomeBanco)){
-                tela.atualizaAreaInformacoes("Os dados foram migrados corretamente...");
-            }
-            else{
-                JOptionPane.showMessageDialog(null, "Ocorreu um erro na migração. Por favor refaça o processo!", "ERRO", JOptionPane.ERROR_MESSAGE);
-                tela.dispose();
-            }
+        } catch (com.mongodb.MongoCommandException e) {
+            JOptionPane.showMessageDialog(null, "Ja existe esse banco de dados no MongoDB!", "ERRO", JOptionPane.ERROR_MESSAGE);
+            tela.dispose();
         }
-         tela.atualizaAreaInformacoes("Todos os dados foram migrados corretamente!");
-         tela.atualizaAreaInformacoes("Iniciando o processo de tratamento dos relacionamentos!");
+        tela.atualizaAreaInformacoes("Todos os dados foram migrados corretamente!");
+        tela.atualizaAreaInformacoes("Iniciando o processo de tratamento dos relacionamentos!");
     }
 
     public boolean validarTotalRegistros(Conexao c, Tabela tabela, String nomeBanco) throws SQLException {

@@ -539,7 +539,7 @@ public class TelaMigracao extends javax.swing.JFrame {
     private void jButtonProsseguirTela3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonProsseguirTela3ActionPerformed
         if (verificarBancoDestino()) {
             jTabbedPane1.setSelectedIndex(3);
-            jTextAreaInformacoes.setText("Migrando banco de dados...");
+            jTextAreaInformacoes.setText("Migrando banco de dados...\n");
             JOptionPane.showMessageDialog(null, "Banco de dados Destino Conectado!", "Informação", JOptionPane.INFORMATION_MESSAGE);
             JOptionPane.showMessageDialog(null, "O processo de migração será iniciado!", "Informação", JOptionPane.INFORMATION_MESSAGE);
             if (bancoDestino.equals("MongoDB")) {
@@ -550,9 +550,16 @@ public class TelaMigracao extends javax.swing.JFrame {
                 Thread t = new Thread(runnable);
                 t.start();
                 if (!t.isAlive()) {
+                    jToggleButtonConcluir.setEnabled(true);
                     jProgressBarMigracao.setIndeterminate(false);
                     jProgressBarMigracao.setStringPainted(true);
                     jProgressBarMigracao.setString("Migração concluida.");
+                    long tempofim = System.currentTimeMillis() - tempoInicio;
+                    if (TimeUnit.MILLISECONDS.toMinutes(tempofim) > 60) {
+                        atualizaAreaInformacoes("Tempo gasto para migração: " + TimeUnit.MILLISECONDS.toMinutes(tempofim) + " minutos");
+                    } else {
+                        atualizaAreaInformacoes("Tempo gasto para migração: " + TimeUnit.MILLISECONDS.toHours(tempofim) + " horas");
+                    }
                 }
             }
         }
@@ -657,7 +664,6 @@ public class TelaMigracao extends javax.swing.JFrame {
     public void atualizaAreaInformacoes(String str) {
         jTextAreaInformacoes.append(str + "\n");
     }
-
     /**
      * @param args the command line arguments
      */
