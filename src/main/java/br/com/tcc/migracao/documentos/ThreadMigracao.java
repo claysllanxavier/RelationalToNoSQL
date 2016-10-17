@@ -18,7 +18,6 @@ public class ThreadMigracao implements Runnable {
     private final Banco banco;
     private final String nomeBD;
     private final No arvore;
-    
 
     public ThreadMigracao(MongodbDAO mongo, Conexao conexaoRelacional, Banco bd, String nomeBD, No arvore) {
         this.mongo = mongo;
@@ -36,6 +35,6 @@ public class ThreadMigracao implements Runnable {
             mongo.trataRelacionamentos(banco, arvore, nomeBD);
         } catch (SQLException | InterruptedException ex) {
             Logger.getLogger(ThreadMigracao.class.getName()).log(Level.SEVERE, null, ex);
-        } 
+        }
     }
 }

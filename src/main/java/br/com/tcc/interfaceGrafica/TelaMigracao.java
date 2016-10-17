@@ -509,9 +509,9 @@ public class TelaMigracao extends javax.swing.JFrame {
                     + "\nSe selecionar uma tabela que tenha relacionamento, favor selecionar a tabela referenciada também!", "ERRO", JOptionPane.ERROR_MESSAGE);
         } else {
             ArrayList<String> stringAuxiliar = modelo.getTabelasNaoSelecionadas();
-            for (String s : stringAuxiliar) {
+            stringAuxiliar.stream().forEach((s) -> {
                 bd.removeTabela(s);
-            }
+            });
             jTabbedPane1.setSelectedIndex(2);
         }
     }//GEN-LAST:event_jButtonProsseguirTela2ActionPerformed
@@ -543,23 +543,28 @@ public class TelaMigracao extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(null, "Banco de dados Destino Conectado!", "Informação", JOptionPane.INFORMATION_MESSAGE);
             JOptionPane.showMessageDialog(null, "O processo de migração será iniciado!", "Informação", JOptionPane.INFORMATION_MESSAGE);
             if (bancoDestino.equals("MongoDB")) {
-                MongodbDAO mongo = new MongodbDAO(mongoConexao.getMongoClient(), this);
-                No arvore = criaArvore(bd);
-                long tempoInicio = System.currentTimeMillis();
-                Runnable runnable = new ThreadMigracao(mongo, conexaoRelacional, bd, jTextFieldBanco.getText(), arvore);
-                Thread t = new Thread(runnable);
-                t.start();
-                if (!t.isAlive()) {
-                    jToggleButtonConcluir.setEnabled(true);
-                    jProgressBarMigracao.setIndeterminate(false);
-                    jProgressBarMigracao.setStringPainted(true);
-                    jProgressBarMigracao.setString("Migração concluida.");
-                    long tempofim = System.currentTimeMillis() - tempoInicio;
-                    if (TimeUnit.MILLISECONDS.toMinutes(tempofim) > 60) {
-                        atualizaAreaInformacoes("Tempo gasto para migração: " + TimeUnit.MILLISECONDS.toMinutes(tempofim) + " minutos");
-                    } else {
-                        atualizaAreaInformacoes("Tempo gasto para migração: " + TimeUnit.MILLISECONDS.toHours(tempofim) + " horas");
+                try {
+                    MongodbDAO mongo = new MongodbDAO(mongoConexao.getMongoClient(), this);
+                    No arvore = criaArvore(bd);
+                    long tempoInicio = System.currentTimeMillis();
+                    Runnable runnable = new ThreadMigracao(mongo, conexaoRelacional, bd, jTextFieldBanco.getText(), arvore);
+                    t = new Thread(runnable);
+                    t.start();
+                    t.join();
+                    if (!t.isAlive()) {
+                        jToggleButtonConcluir.setEnabled(true);
+                        jProgressBarMigracao.setIndeterminate(false);
+                        jProgressBarMigracao.setStringPainted(true);
+                        jProgressBarMigracao.setString("Migração concluida.");
+                        long tempofim = System.currentTimeMillis() - tempoInicio;
+                        if (TimeUnit.MILLISECONDS.toMinutes(tempofim) < 60) {
+                            atualizaAreaInformacoes("Tempo gasto para migração: " + TimeUnit.MILLISECONDS.toMinutes(tempofim) + " minutos");
+                        } else {
+                            atualizaAreaInformacoes("Tempo gasto para migração: " + TimeUnit.MILLISECONDS.toHours(tempofim) + " horas");
+                        }
                     }
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(TelaMigracao.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         }
@@ -664,6 +669,7 @@ public class TelaMigracao extends javax.swing.JFrame {
     public void atualizaAreaInformacoes(String str) {
         jTextAreaInformacoes.append(str + "\n");
     }
+
     /**
      * @param args the command line arguments
      */
@@ -689,12 +695,10 @@ public class TelaMigracao extends javax.swing.JFrame {
         //</editor-fold>
 
         /* Create and display the form */
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                java.awt.EventQueue.invokeLater(() -> {
-                    new TelaMigracao().setVisible(true);
-                });
-            }
+        SwingUtilities.invokeLater(() -> {
+            java.awt.EventQueue.invokeLater(() -> {
+                new TelaMigracao().setVisible(true);
+            });
         });
     }
     ModeloTabela modelo = new ModeloTabela();
@@ -702,6 +706,7 @@ public class TelaMigracao extends javax.swing.JFrame {
     ConexaoMongoDB mongoConexao;
     Conexao conexaoRelacional;
     String bancoDestino;
+    Thread t;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox<String> JComboboxBanco;
