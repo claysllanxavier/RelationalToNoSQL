@@ -546,6 +546,7 @@ public class TelaMigracao extends javax.swing.JFrame {
                 try {
                     MongodbDAO mongo = new MongodbDAO(mongoConexao.getMongoClient(), this);
                     No arvore = criaArvore(bd);
+                    arvore.printTree(arvore, " ");
                     long tempoInicio = System.currentTimeMillis();
                     Runnable runnable = new ThreadMigracao(mongo, conexaoRelacional, bd, jTextFieldBanco.getText(), arvore);
                     t = new Thread(runnable);

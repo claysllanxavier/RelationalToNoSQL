@@ -67,31 +67,38 @@ public class MongodbDAO {
                 if (tabela.getNome().equalsIgnoreCase(filho.getNomeTabela())) {
                     for (Coluna coluna : tabela.getColunas()) {
                         if (coluna.isChaveEstrangeira()) {
-                            DBCursor cursor = getColl(filho.getNomeTabela()).find();
-                            while (cursor.hasNext()) {
-                                DBObject obj = cursor.next();
-                                BasicDBObject searchQuery = new BasicDBObject().append("_id", obj.get("_id"));
-                                BasicDBObject whereQuery = new BasicDBObject();
-                                if (obj.get(coluna.getNome()) != null) {
-                                    whereQuery.put(coluna.getColunaForeignKeyReferencia(), obj.get(coluna.getNome()));
-                                    DBCursor cursorAux = getColl(coluna.getTabelaForeignKeyReferencia()).find(whereQuery);
-                                    ArrayList<Object> lista = new BasicDBList();
-                                    while (cursorAux.hasNext()) {
-                                        lista.add(cursorAux.next());
-                                    }
-                                    if (!lista.isEmpty()) {
-                                        if (lista.size() == 1) {
-                                            BasicDBObject doc1 = new BasicDBObject();
-                                            doc1.put(coluna.getTabelaForeignKeyReferencia(), lista.get(0));
-                                            getColl(filho.getNomeTabela()).update(searchQuery, new BasicDBObject("$set", doc1));
-                                            getColl(filho.getNomeTabela()).update(searchQuery, new BasicDBObject("$unset", new BasicDBObject(coluna.getNome(), "")));
-                                            getColl(filho.getNomeTabela()).update(searchQuery, new BasicDBObject("$unset", new BasicDBObject(coluna.getTabelaForeignKeyReferencia() + "._id", "")));
-                                        } else {
-                                            BasicDBObject doc1 = new BasicDBObject();
-                                            doc1.put(coluna.getTabelaForeignKeyReferencia(), lista);
-                                            getColl(filho.getNomeTabela()).update(searchQuery, new BasicDBObject("$set", doc1));
-                                            getColl(filho.getNomeTabela()).update(searchQuery, new BasicDBObject("$unset", new BasicDBObject(coluna.getNome(), "")));
-                                            getColl(filho.getNomeTabela()).update(searchQuery, new BasicDBObject("$unset", new BasicDBObject(coluna.getTabelaForeignKeyReferencia() + "._id", "")));
+                            int subPartes = 10;
+                            int inicio = 0;
+
+                            int total = 20198310;
+                            int sub_total = total / subPartes;
+                            for (int i = 0; i < subPartes; i++) {
+                                DBCursor cursor = getColl(filho.getNomeTabela()).find().skip(inicio).limit(sub_total);
+                                while (cursor.hasNext()) {
+                                    DBObject obj = cursor.next();
+                                    BasicDBObject searchQuery = new BasicDBObject().append("_id", obj.get("_id"));
+                                    BasicDBObject whereQuery = new BasicDBObject();
+                                    if (obj.get(coluna.getNome()) != null) {
+                                        whereQuery.put(coluna.getColunaForeignKeyReferencia(), obj.get(coluna.getNome()));
+                                        DBCursor cursorAux = getColl(coluna.getTabelaForeignKeyReferencia()).find(whereQuery);
+                                        ArrayList<Object> lista = new BasicDBList();
+                                        while (cursorAux.hasNext()) {
+                                            lista.add(cursorAux.next());
+                                        }
+                                        if (!lista.isEmpty()) {
+                                            if (lista.size() == 1) {
+                                                BasicDBObject doc1 = new BasicDBObject();
+                                                doc1.put(coluna.getTabelaForeignKeyReferencia(), lista.get(0));
+                                                getColl(filho.getNomeTabela()).update(searchQuery, new BasicDBObject("$set", doc1));
+                                                getColl(filho.getNomeTabela()).update(searchQuery, new BasicDBObject("$unset", new BasicDBObject(coluna.getNome(), "")));
+                                                getColl(filho.getNomeTabela()).update(searchQuery, new BasicDBObject("$unset", new BasicDBObject(coluna.getTabelaForeignKeyReferencia() + "._id", "")));
+                                            } else {
+                                                BasicDBObject doc1 = new BasicDBObject();
+                                                doc1.put(coluna.getTabelaForeignKeyReferencia(), lista);
+                                                getColl(filho.getNomeTabela()).update(searchQuery, new BasicDBObject("$set", doc1));
+                                                getColl(filho.getNomeTabela()).update(searchQuery, new BasicDBObject("$unset", new BasicDBObject(coluna.getNome(), "")));
+                                                getColl(filho.getNomeTabela()).update(searchQuery, new BasicDBObject("$unset", new BasicDBObject(coluna.getTabelaForeignKeyReferencia() + "._id", "")));
+                                            }
                                         }
                                     }
                                 }
